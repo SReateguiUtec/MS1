@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.models import db, Portafolio, Favorito
 
-
 def register_routes(app):
     portafolios_bp = Blueprint('portafolios', __name__, url_prefix='/api/portafolios')
     favoritos_bp = Blueprint('favoritos', __name__, url_prefix='/api/favoritos')
@@ -12,13 +11,34 @@ def register_routes(app):
 
     @portafolios_bp.route('/', methods=['GET'])
     def get_portafolios():
-        portafolios = Portafolio.query.all()
-        return jsonify([{
-            'id': p.id,
-            'nombre': p.nombre,
-            'descripcion': p.descripcion,
-            'created_at': p.created_at.isoformat()
-        } for p in portafolios]), 200
+        page     = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 5, type=int), 100)
+        search   = request.args.get('search', '', type=str).strip()
+
+        query = Portafolio.query
+        if search:
+            query = query.filter(Portafolio.nombre.ilike(f'%{search}%'))
+
+        total = query.count()
+        pages = max(1, (total + per_page - 1) // per_page)
+        portafolios = (query
+                       .order_by(Portafolio.id)
+                       .offset((page - 1) * per_page)
+                       .limit(per_page)
+                       .all())
+
+        return jsonify({
+            'portafolios': [{
+                'id': p.id,
+                'nombre': p.nombre,
+                'descripcion': p.descripcion,
+                'created_at': p.created_at.isoformat()
+            } for p in portafolios],
+            'total':    total,
+            'page':     page,
+            'pages':    pages,
+            'per_page': per_page,
+        }), 200
 
     @portafolios_bp.route('/<int:portafolio_id>', methods=['GET'])
     def get_portafolio(portafolio_id):
