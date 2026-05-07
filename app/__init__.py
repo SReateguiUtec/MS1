@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flasgger import Swagger
 from dotenv import load_dotenv
 import os
 
@@ -18,6 +19,22 @@ def create_app():
     db.init_app(app)
     
     CORS(app)
+    
+    swagger_config = {
+        "headers": [],
+        "specs": [
+            {
+                "endpoint": 'apispec_1',
+                "route": '/apispec_1.json',
+                "rule_filter": lambda rule: True,
+                "model_filter": lambda tag: True,
+            }
+        ],
+        "static_url_path": "/flasgger_static",
+        "swagger_ui": True,
+        "specs_route": "/swagger-ui/m1"
+    }
+    Swagger(app, config=swagger_config)
     
     with app.app_context():
         db.create_all()

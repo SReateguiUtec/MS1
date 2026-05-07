@@ -11,6 +11,22 @@ def register_routes(app):
 
     @portafolios_bp.route('/', methods=['GET'])
     def get_portafolios():
+        """
+        Listar portafolios
+        ---
+        tags:
+          - Portafolios
+        parameters:
+          - name: page
+            in: query
+            type: integer
+          - name: search
+            in: query
+            type: string
+        responses:
+          200:
+            description: Lista de portafolios
+        """
         page     = request.args.get('page', 1, type=int)
         per_page = min(request.args.get('per_page', 5, type=int), 100)
         search   = request.args.get('search', '', type=str).strip()
@@ -42,6 +58,22 @@ def register_routes(app):
 
     @portafolios_bp.route('/<int:portafolio_id>', methods=['GET'])
     def get_portafolio(portafolio_id):
+        """
+        Obtener un portafolio específico
+        ---
+        tags:
+          - Portafolios
+        parameters:
+          - name: portafolio_id
+            in: path
+            type: integer
+            required: true
+        responses:
+          200:
+            description: Detalles del portafolio
+          404:
+            description: No encontrado
+        """
         p = Portafolio.query.get(portafolio_id)
         if not p:
             return jsonify({'error': 'Portafolio no encontrado'}), 404
@@ -94,6 +126,20 @@ def register_routes(app):
 
     @favoritos_bp.route('/<int:portafolio_id>', methods=['GET'])
     def get_favoritos(portafolio_id):
+        """
+        Obtener favoritos de un portafolio
+        ---
+        tags:
+          - Favoritos
+        parameters:
+          - name: portafolio_id
+            in: path
+            type: integer
+            required: true
+        responses:
+          200:
+            description: Lista de símbolos favoritos
+        """
         favoritos = Favorito.query.filter_by(portafolio_id=portafolio_id).all()
         return jsonify([{
             'id': f.id,
@@ -138,6 +184,15 @@ def register_routes(app):
 
     @app.route('/health', methods=['GET'])
     def health():
+        """
+        Health Check
+        ---
+        tags:
+          - Sistema
+        responses:
+          200:
+            description: OK
+        """
         try:
             db.session.execute(db.text('SELECT 1'))
             return jsonify({'status': 'ok', 'db': 'connected'}), 200
