@@ -24,13 +24,13 @@ def create_app():
         "headers": [],
         "specs": [
             {
-                "endpoint": 'apispec_1',
-                "route": '/apispec_1.json',
+                "endpoint": 'apispec_m1',
+                "route": '/apispec_m1.json',
                 "rule_filter": lambda rule: True,
                 "model_filter": lambda tag: True,
             }
         ],
-        "static_url_path": "/flasgger_static",
+        "static_url_path": "/flasgger_static_m1",
         "swagger_ui": True,
         "specs_route": "/swagger-ui/m1"
     }
